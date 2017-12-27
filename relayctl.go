@@ -25,6 +25,15 @@ type JsonResponse struct {
 	Data interface{} `json:"data"`
 }
 
+type JsonErrorResponse struct {
+	Error *ApiError `json:"error"`
+}
+
+type ApiError struct {
+	Status int    `json:"status"`
+	Title  string `json:"title"`
+}
+
 // module stores state of relays with their IDs as keys.
 var module = make(map[string]*Relay)
 
@@ -42,10 +51,36 @@ func RelayIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 }
 
+// RelayShow handles the relays show action (GET /relays/:id).
+func RelayShow(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	id := params.ByName("id")
+	relay, ok := module[id]
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	if !ok {
+		// No relay with the ID given in the URL has been found
+		w.WriteHeader(http.StatusNotFound)
+		response := JsonErrorResponse{
+			Error: &ApiError{
+				Status: http.StatusNotFound,
+				Title:  "Relay not found",
+			},
+		}
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			panic(err)
+		}
+		return
+	}
+	response := JsonResponse{Data: relay}
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	router := httprouter.New()
 	router.GET("/", Index)
 	router.GET("/relays", RelayIndex)
+	router.GET("/relays/:id", RelayShow)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

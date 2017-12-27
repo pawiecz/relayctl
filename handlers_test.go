@@ -40,4 +40,26 @@ var _ = Describe("Main", func() {
 		Expect(rr.Code).To(Equal(http.StatusOK))
 		Expect(rr.Body.String()).To(MatchUnorderedJSON(expectedResponse))
 	})
+
+	It("should return an error on show request for nonexistent relay", func() {
+		expectedResponse := "{\"error\":{\"status\":404,\"title\":\"Relay not found\"}}\n"
+		req := httptest.NewRequest("GET", "/relays/I0", nil)
+		rr := newRequestRecorder(req, "GET", "/relays/:id", RelayShow)
+		Expect(rr.Code).To(Equal(http.StatusNotFound))
+		Expect(rr.Body.String()).To(MatchJSON(expectedResponse))
+	})
+
+	It("should return proper data on show request for existing relays", func() {
+		expectedResponse := "{\"meta\":null,\"data\":{\"id\":\"I1\",\"pin\":17,\"state\":false}}\n"
+		req := httptest.NewRequest("GET", "/relays/I1", nil)
+		rr := newRequestRecorder(req, "GET", "/relays/:id", RelayShow)
+		Expect(rr.Code).To(Equal(http.StatusOK))
+		Expect(rr.Body.String()).To(MatchJSON(expectedResponse))
+
+		expectedResponse = "{\"meta\":null,\"data\":{\"id\":\"I2\",\"pin\":27,\"state\":true}}\n"
+		req = httptest.NewRequest("GET", "/relays/I2", nil)
+		rr = newRequestRecorder(req, "GET", "/relays/:id", RelayShow)
+		Expect(rr.Code).To(Equal(http.StatusOK))
+		Expect(rr.Body.String()).To(MatchJSON(expectedResponse))
+	})
 })

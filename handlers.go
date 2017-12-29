@@ -19,35 +19,28 @@ func RelayIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	for _, relay := range module {
 		relays = append(relays, relay)
 	}
-	response := &JsonResponse{Data: &relays}
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		panic(err)
-	}
+	writeResponse(w, http.StatusOK, &JsonResponse{Data: relays})
 }
 
 // RelayShow handles the relays show action (GET /relays/:id).
 func RelayShow(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	id := params.ByName("id")
 	relay, ok := module[id]
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	if !ok {
 		// No relay with the ID given in the URL has been found
-		w.WriteHeader(http.StatusNotFound)
-		response := JsonErrorResponse{
-			Error: &ApiError{
-				Status: http.StatusNotFound,
-				Title:  "Relay not found",
-			},
-		}
-		if err := json.NewEncoder(w).Encode(response); err != nil {
-			panic(err)
-		}
+		apiError := &ApiError{Status: http.StatusNotFound, Title: "Relay not found"}
+		writeResponse(w, http.StatusNotFound, &JsonErrorResponse{Error: apiError})
 		return
 	}
-	response := JsonResponse{Data: relay}
+	writeResponse(w, http.StatusOK, &JsonResponse{Data: relay})
+}
+
+// writeResponse writes standard JSON API response with status code.
+func writeResponse(w http.ResponseWriter, status int, response interface{}) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		panic(err)
+		apiError := &ApiError{Status: http.StatusInternalServerError, Title: "Internal server error"}
+		writeResponse(w, http.StatusInternalServerError, apiError)
 	}
 }

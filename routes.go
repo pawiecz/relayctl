@@ -27,7 +27,7 @@ func AllRoutes() Routes {
 func NewRouter(routes Routes) *httprouter.Router {
 	router := httprouter.New()
 	for _, route := range routes {
-		router.Handle(route.Method, route.Path, route.HandlerFunc)
+		router.Handle(route.Method, route.Path, Logger(route.HandlerFunc))
 	}
 	return router
 }

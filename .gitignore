@@ -1,0 +1,6 @@
+# Target specific configuration and binary
+Makefile.target
+relayctl.target
+
+# Test coverage analysis artifact
+relayctl.coverprofile

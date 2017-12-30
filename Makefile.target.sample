@@ -1,0 +1,7 @@
+GOARCH=arm
+GOARM=6
+GOOS=linux
+
+USER=pi
+HOST=10.42.0.224
+DEST=relayctl

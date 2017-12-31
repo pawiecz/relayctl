@@ -25,14 +25,28 @@ func RelayIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 // RelayShow handles the relays show action (GET /relays/:id).
 func RelayShow(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	id := params.ByName("id")
-	relay, ok := module[id]
-	if !ok {
-		// No relay with the ID given in the URL has been found
-		apiError := &ApiError{Status: http.StatusNotFound, Title: "Relay not found"}
-		writeResponse(w, http.StatusNotFound, &JsonErrorResponse{Error: apiError})
+	relay, err := findRelay(id)
+	if err != nil {
+		writeError(w, http.StatusNotFound, err.Error())
 		return
 	}
 	writeResponse(w, http.StatusOK, &JsonResponse{Data: relay})
+}
+
+// findRelay locates Relay with the given ID on the module.
+func findRelay(id string) (*Relay, error) {
+	relay, ok := module[id]
+	if !ok {
+		// No relay with the ID given in the URL has been found
+		return nil, ErrRelayNotFound
+	}
+	return relay, nil
+}
+
+// writeError wraps writing API error response.
+func writeError(w http.ResponseWriter, status int, title string) {
+	apiError := &ApiError{Status: status, Title: title}
+	writeResponse(w, status, &JsonErrorResponse{Error: apiError})
 }
 
 // writeResponse writes standard JSON API response with status code.
@@ -40,7 +54,7 @@ func writeResponse(w http.ResponseWriter, status int, response interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		apiError := &ApiError{Status: http.StatusInternalServerError, Title: "Internal server error"}
+		apiError := &ApiError{Status: http.StatusInternalServerError, Title: "internal server error"}
 		writeResponse(w, http.StatusInternalServerError, apiError)
 	}
 }

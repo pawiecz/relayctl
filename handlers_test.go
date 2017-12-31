@@ -45,7 +45,7 @@ var _ = Describe("Main", func() {
 	})
 
 	It("should return an error on show request for nonexistent relay", func() {
-		expected := "{\"error\":{\"status\":404,\"title\":\"Relay not found\"}}\n"
+		expected := "{\"error\":{\"status\":404,\"title\":\"relay not found\"}}\n"
 		actual := call("GET", "/relays/I0", "/relays/:id", RelayShow)
 		Expect(actual.Code).To(Equal(http.StatusNotFound))
 		Expect(actual.Body.String()).To(MatchJSON(expected))

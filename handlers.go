@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/nathan-osman/go-rpigpio"
 )
 
 // Index handles the default route (GET /).
@@ -37,13 +36,13 @@ func RelayShow(w http.ResponseWriter, r *http.Request, params httprouter.Params)
 // RelayOn handles the relays on action (GET /relays/:id/on).
 func RelayOn(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	id := params.ByName("id")
-	switchRelay(w, id, true, rpi.LOW)
+	switchRelay(w, id, PIN_ON)
 }
 
 // RelayOff handles the relays off action (GET /relays/:id/off).
 func RelayOff(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	id := params.ByName("id")
-	switchRelay(w, id, false, rpi.HIGH)
+	switchRelay(w, id, PIN_OFF)
 }
 
 // findRelay locates Relay with the given ID on the module.
@@ -57,13 +56,13 @@ func findRelay(id string) (*Relay, error) {
 }
 
 // switchRelay provides unified wrapper for Relay On/Off actions.
-func switchRelay(w http.ResponseWriter, id string, state bool, pinState rpi.Value) {
+func switchRelay(w http.ResponseWriter, id string, mode int) {
 	relay, err := findRelay(id)
 	if err != nil {
 		writeError(w, err)
 		return
 	}
-	if err := setState(id, state, pinState); err != nil {
+	if err := setState(id, mode); err != nil {
 		writeError(w, err)
 		return
 	}
@@ -71,12 +70,13 @@ func switchRelay(w http.ResponseWriter, id string, state bool, pinState rpi.Valu
 }
 
 // setState switches given pin to requested state.
-func setState(id string, state bool, pinState rpi.Value) error {
-	if err := pins[id].Write(pinState); err != nil {
+func setState(id string, mode int) error {
+	ps := modePinState[mode]
+	if err := pins[id].Write(ps.value); err != nil {
 		// Writing requested state to the given pin failed
 		return ErrStateChangeFailed
 	}
-	module[id].State = state
+	module[id].State = ps.state
 	return nil
 }
 

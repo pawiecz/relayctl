@@ -4,6 +4,21 @@ import "github.com/nathan-osman/go-rpigpio"
 
 type PinMap map[string]int
 
+type PinState struct {
+	state bool
+	value rpi.Value
+}
+
+const (
+	PIN_ON = iota
+	PIN_OFF
+)
+
+var modePinState = map[int]PinState{
+	PIN_ON:  PinState{true, rpi.LOW},
+	PIN_OFF: PinState{false, rpi.HIGH},
+}
+
 func AllPins() PinMap {
 	pinmap := PinMap{
 		"I1": 27,

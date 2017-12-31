@@ -1,5 +1,6 @@
 BINARY_NAME=relayctl
 BINARY_TARGET=$(BINARY_NAME).target
+CONFIG=pins.toml
 
 include Makefile.target
 
@@ -18,6 +19,6 @@ deploy:
 	scp $(BINARY_TARGET) $(USER)@$(HOST):$(DEST)
 
 run:
-	-ssh -t $(USER)@$(HOST) $(DEST)/$(BINARY_TARGET)
+	-ssh -t $(USER)@$(HOST) $(DEST)/$(BINARY_TARGET) -config $(DEST)/$(CONFIG)
 
 .PHONY: all test cover build deploy run

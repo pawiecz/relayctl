@@ -19,14 +19,6 @@ var modePinState = map[int]PinState{
 	PIN_OFF: PinState{false, rpi.HIGH},
 }
 
-func AllPins() PinMap {
-	pinmap := PinMap{
-		"I1": 27,
-		"I2": 17,
-	}
-	return pinmap
-}
-
 func SetupModule(pinmap PinMap) {
 	for id, pin := range pinmap {
 		p, err := rpi.OpenPin(pin, rpi.OUT)

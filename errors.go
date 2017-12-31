@@ -1,6 +1,9 @@
 package main
 
-import "errors"
+import (
+	"errors"
+	"net/http"
+)
 
 var (
 	// ErrRelayNotFound is returned when Relay is not found.
@@ -8,3 +11,8 @@ var (
 	// ErrStateChangeFailed is returned if state change fails.
 	ErrStateChangeFailed = errors.New("state change failed")
 )
+
+var errHttpStatus = map[error]int{
+	ErrRelayNotFound:     http.StatusNotFound,
+	ErrStateChangeFailed: http.StatusServiceUnavailable,
+}

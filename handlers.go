@@ -28,7 +28,7 @@ func RelayShow(w http.ResponseWriter, r *http.Request, params httprouter.Params)
 	id := params.ByName("id")
 	relay, err := findRelay(id)
 	if err != nil {
-		writeError(w, http.StatusNotFound, err.Error())
+		writeError(w, err)
 		return
 	}
 	writeResponse(w, http.StatusOK, &JsonResponse{Data: relay})
@@ -60,11 +60,11 @@ func findRelay(id string) (*Relay, error) {
 func switchRelay(w http.ResponseWriter, id string, state bool, pinState rpi.Value) {
 	relay, err := findRelay(id)
 	if err != nil {
-		writeError(w, http.StatusNotFound, err.Error())
+		writeError(w, err)
 		return
 	}
 	if err := setState(id, state, pinState); err != nil {
-		writeError(w, http.StatusServiceUnavailable, err.Error())
+		writeError(w, err)
 		return
 	}
 	writeResponse(w, http.StatusOK, &JsonResponse{Data: relay})
@@ -81,8 +81,9 @@ func setState(id string, state bool, pinState rpi.Value) error {
 }
 
 // writeError wraps writing API error response.
-func writeError(w http.ResponseWriter, status int, title string) {
-	apiError := &ApiError{Status: status, Title: title}
+func writeError(w http.ResponseWriter, err error) {
+	status := errHttpStatus[err]
+	apiError := &ApiError{Status: status, Title: err.Error()}
 	writeResponse(w, status, &JsonErrorResponse{Error: apiError})
 }
 

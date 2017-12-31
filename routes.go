@@ -19,6 +19,8 @@ func AllRoutes() Routes {
 		Route{"Index", "GET", "/", Index},
 		Route{"RelayIndex", "GET", "/relays", RelayIndex},
 		Route{"RelayShow", "GET", "/relays/:id", RelayShow},
+		Route{"RelayOn", "GET", "/relays/:id/on", RelayOn},
+		Route{"RelayOff", "GET", "/relays/:id/off", RelayOff},
 	}
 	return routes
 }

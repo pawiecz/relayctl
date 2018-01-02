@@ -15,10 +15,12 @@ type Config struct {
 var (
 	conf     Config
 	confFile string
+	address  string
 )
 
 func setFlags() {
 	flag.StringVar(&confFile, "config", "pins.toml", "TOML file with relay to pin mapping")
+	flag.StringVar(&address, "address", ":8080", "API server listen address")
 }
 
 func main() {
@@ -32,5 +34,5 @@ func main() {
 	defer CloseModule()
 
 	router := NewRouter(AllRoutes())
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(address, router))
 }
